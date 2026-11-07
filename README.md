@@ -50,6 +50,7 @@ Audio features → valence/arousal map ─┴→ trajectory-aware MMR ranking �
 | Human study / clinical impact | Not conducted | No therapeutic or usability claim |
 
 The full protocol is available in [RESEARCH_EXECUTION_PROTOCOL.md](paper/RESEARCH_EXECUTION_PROTOCOL.md).
+The measured FER2013 results and their reporting boundary are recorded in [RESULTS.md](RESULTS.md).
 
 ## Reproduce the categorical baseline
 
