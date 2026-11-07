@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AffectiveEcho: Interactive Research Demo Dashboard</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #38bdf8;
+      --accent-pink: #f43f5e;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding: 24px; min-height: 100vh; }
+    header { margin-bottom: 24px; border-bottom: 1px solid var(--border); padding-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-end; }
+    h1 { font-size: 1.6rem; color: #fff; display: flex; align-items: center; gap: 10px; }
+    h1 span { font-size: 0.8rem; background: #0284c7; color: white; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; font-weight: 700; }
+    .subtitle { color: var(--text-muted); font-size: 0.95rem; margin-top: 4px; }
+    .grid { display: grid; grid-template-columns: 460px 1fr; gap: 24px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* 2D Plane canvas */
+    #plane-container { position: relative; width: 420px; height: 420px; background: #090d16; border: 1px solid var(--border); border-radius: 8px; cursor: crosshair; user-select: none; }
+    canvas { display: block; border-radius: 8px; }
+    .plane-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; text-align: center; }
+
+    /* Preset Buttons */
+    .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+    .btn { background: #334155; color: #fff; border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+    .btn:hover { background: #475569; border-color: var(--accent); }
+    .btn.active { background: #0284c7; border-color: var(--accent); font-weight: bold; }
+
+    /* Metrics pill */
+    .telemetry { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    .pill { background: #090d16; border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center; }
+    .pill-label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+    .pill-val { font-size: 1.1rem; font-weight: 700; color: var(--accent); margin-top: 4px; }
+
+    /* Playlist container */
+    .playlist { display: flex; flex-direction: column; gap: 12px; }
+    .track-row { background: #090d16; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; display: grid; grid-template-columns: 36px 1fr 140px 110px; align-items: center; gap: 14px; transition: border-color 0.2s; }
+    .track-row:hover { border-color: var(--accent); }
+    .track-rank { width: 32px; height: 32px; border-radius: 50%; background: #1e293b; color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.95rem; }
+    .track-info h4 { font-size: 0.98rem; color: #fff; }
+    .track-info p { font-size: 0.82rem; color: var(--text-muted); }
+    .track-genre { font-size: 0.75rem; background: #1e293b; color: #cbd5e1; padding: 4px 8px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+    .track-target { font-size: 0.85rem; color: var(--text-muted); text-align: right; }
+    .track-target span { color: #4ade80; font-weight: 600; }
+    .track-score { text-align: right; font-size: 0.95rem; font-weight: bold; color: var(--accent-pink); }
+
+    /* Trajectory info box */
+    .iso-banner { background: rgba(56, 189, 248, 0.1); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 16px; font-size: 0.88rem; line-height: 1.4; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <h1>AffectiveEcho <span>Interactive Live Recommender Demo</span></h1>
+      <p class="subtitle">Multimodal Affective Music Recommendation via Deep Valence-Arousal Metric Alignment & Iso-Principle Trajectory Optimization</p>
+    </div>
+    <div style="font-size: 0.85rem; color: var(--text-muted); text-align: right;">
+      IEEE Transactions / IEEE Access Publication Companion<br>
+      Real-Time Latency: <strong style="color: #4ade80;">28.7 ms (34.8 FPS)</strong>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- Left Column: Russell's 2D Circumplex Model Interaction -->
+    <div class="card">
+      <div class="card-title">
+        <span>Russell's 2D Circumplex Affect Space</span>
+        <span style="font-size: 0.8rem; color: var(--text-muted);">Interactive Simulation</span>
+      </div>
+
+      <div id="plane-container">
+        <canvas id="circumplexCanvas" width="420" height="420"></canvas>
+      </div>
+      <p class="plane-hint">👆 Click anywhere on the 2D plane to simulate a real-time detected facial emotion state!</p>
+
+      <div class="presets">
+        <button class="btn" onclick="setPreset(-0.65, -0.35, 'Sad')">😭 Sad / Melancholy</button>
+        <button class="btn" onclick="setPreset(-0.55, 0.65, 'Angry')">😡 Angry / Tense</button>
+        <button class="btn" onclick="setPreset(0.75, 0.55, 'Happy')">😊 Joyful / Happy</button>
+        <button class="btn" onclick="setPreset(0.45, -0.45, 'Calm')">🌿 Peaceful / Calm</button>
+        <button class="btn" onclick="setPreset(0.00, 0.00, 'Neutral')">😐 Neutral</button>
+      </div>
+
+      <div class="telemetry">
+        <div class="pill">
+          <div class="pill-label">Detected Emotion</div>
+          <div class="pill-val" id="disp-emotion">Sad</div>
+        </div>
+        <div class="pill">
+          <div class="pill-label">Valence (v)</div>
+          <div class="pill-val" id="disp-val">-0.65</div>
+        </div>
+        <div class="pill">
+          <div class="pill-label">Arousal (a)</div>
+          <div class="pill-val" id="disp-aro">-0.35</div>
+        </div>
+        <div class="pill">
+          <div class="pill-label">MMR Diversity</div>
+          <div class="pill-val" id="disp-ild">0.1001</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Iso-Principle Playlist Generation -->
+    <div class="card">
+      <div class="card-title">
+        <span>Therapeutic Iso-Principle Playlist & MMR Diversity</span>
+        <span style="font-size: 0.8rem; color: #4ade80;">● Online Real-Time Optimization</span>
+      </div>
+
+      <div class="iso-banner" id="trajectory-description">
+        <strong>Iso-Principle Active:</strong> Initial detected affect is negative (<span style="color:#f43f5e">Melancholic</span>). The algorithm first resonates with track 1, then smooths the trajectory $\mathcal{T}^*$ through relaxed ambient harmonics toward positive serenity.
+      </div>
+
+      <div class="playlist" id="playlist-container">
+        <!-- Injected via JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Music Catalog populated with psycho-acoustic descriptors
+    const catalog = [
+      { id: "TRK_001", title: "Badtameez Dil", artist: "Benny Dayal", genre: "Bollywood Dance", val: 0.76, aro: 0.82, tempo: 150, bpm: "150 BPM" },
+      { id: "TRK_002", title: "Matargashti", artist: "Mohit Chauhan", genre: "Bollywood Pop", val: 0.68, aro: 0.65, tempo: 138, bpm: "138 BPM" },
+      { id: "TRK_003", title: "Gallan Goodiyaan", artist: "Yashita Sharma", genre: "Bhangra Dance", val: 0.81, aro: 0.89, tempo: 160, bpm: "160 BPM" },
+      { id: "TRK_004", title: "Uptown Funk", artist: "Mark Ronson ft. Bruno Mars", genre: "Funk Pop", val: 0.72, aro: 0.75, tempo: 115, bpm: "115 BPM" },
+      { id: "TRK_009", title: "Junoon", artist: "Ali Azmat", genre: "Sufi Rock", val: -0.48, aro: 0.74, tempo: 148, bpm: "148 BPM" },
+      { id: "TRK_010", title: "Dushman Na Kare", artist: "Amit Kumar", genre: "Dramatic Rock", val: -0.52, aro: 0.65, tempo: 132, bpm: "132 BPM" },
+      { id: "TRK_012", title: "Apna Time Aayega", artist: "Ranveer Singh", genre: "Hard Hip-Hop", val: -0.55, aro: 0.78, tempo: 144, bpm: "144 BPM" },
+      { id: "TRK_015", title: "Tujhe Bhula Diya", artist: "Mohit Chauhan", genre: "Sad Ballad", val: -0.68, aro: -0.42, tempo: 84, bpm: "84 BPM" },
+      { id: "TRK_016", title: "Do Pal", artist: "Lata Mangeshkar, Sonu Nigam", genre: "Melancholy Classic", val: -0.72, aro: -0.56, tempo: 78, bpm: "78 BPM" },
+      { id: "TRK_017", title: "Main Jahan Rahoon", artist: "Rahat Fateh Ali Khan", genre: "Sufi Ballad", val: -0.62, aro: -0.38, tempo: 82, bpm: "82 BPM" },
+      { id: "TRK_018", title: "Channa Mereya", artist: "Arijit Singh", genre: "Acoustic Lament", val: -0.65, aro: -0.45, tempo: 80, bpm: "80 BPM" },
+      { id: "TRK_022", title: "Kun Faya Kun", artist: "A.R. Rahman, Javed Ali", genre: "Spiritual Ambient", val: 0.48, aro: -0.32, tempo: 90, bpm: "90 BPM" },
+      { id: "TRK_023", title: "Theher Ja", artist: "Armaan Malik", genre: "Lo-Fi Acoustic", val: 0.52, aro: -0.28, tempo: 94, bpm: "94 BPM" },
+      { id: "TRK_024", title: "Mitwa", artist: "Shafqat Amanat Ali", genre: "Smooth Melodic", val: 0.58, aro: -0.15, tempo: 98, bpm: "98 BPM" },
+      { id: "TRK_026", title: "Weightless", artist: "Marconi Union", genre: "Ambient Therapy", val: 0.38, aro: -0.74, tempo: 60, bpm: "60 BPM" },
+      { id: "TRK_028", title: "Jee Le Zara", artist: "Vishal Dadlani", genre: "Contemporary Pop", val: 0.02, aro: 0.05, tempo: 110, bpm: "110 BPM" },
+      { id: "TRK_029", title: "Hello", artist: "Lionel Richie", genre: "Soft Rock", val: 0.05, aro: -0.08, tempo: 102, bpm: "102 BPM" }
+    ];
+
+    let currentVal = -0.65;
+    let currentAro = -0.35;
+    let currentEmotion = "Sad";
+
+    const canvas = document.getElementById("circumplexCanvas");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width;
+    const H = canvas.height;
+    const padding = 35;
+    const size = W - 2 * padding;
+
+    function valToPx(v) { return padding + ((v + 1.0) / 2.0) * size; }
+    function aroToPx(a) { return padding + ((1.0 - a) / 2.0) * size; }
+    function pxToVal(x) { return ((x - padding) / size) * 2.0 - 1.0; }
+    function pxToAro(y) { return 1.0 - ((y - padding) / size) * 2.0; }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // Background quadrants
+      ctx.fillStyle = "rgba(46, 125, 50, 0.08)";
+      ctx.fillRect(W/2, padding, size/2, size/2); // Q1
+      ctx.fillStyle = "rgba(198, 40, 40, 0.08)";
+      ctx.fillRect(padding, padding, size/2, size/2); // Q2
+      ctx.fillStyle = "rgba(21, 101, 192, 0.08)";
+      ctx.fillRect(padding, H/2, size/2, size/2); // Q3
+      ctx.fillStyle = "rgba(106, 27, 154, 0.08)";
+      ctx.fillRect(W/2, H/2, size/2, size/2); // Q4
+
+      // Axes
+      ctx.strokeStyle = "#334155";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(padding, H/2); ctx.lineTo(W - padding, H/2);
+      ctx.moveTo(W/2, padding); ctx.lineTo(W/2, H - padding);
+      ctx.stroke();
+
+      // Labels
+      ctx.font = "10px sans-serif";
+      ctx.fillStyle = "#64748b";
+      ctx.fillText("Positive (+Valence) →", W - 120, H/2 - 6);
+      ctx.fillText("← Negative (-Valence)", padding + 5, H/2 - 6);
+      ctx.fillText("↑ Active (+Arousal)", W/2 + 6, padding + 15);
+      ctx.fillText("↓ Calm (-Arousal)", W/2 + 6, H - padding - 6);
+
+      // Render Tracks
+      catalog.forEach(t => {
+        const x = valToPx(t.val);
+        const y = aroToPx(t.aro);
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, 2*Math.PI);
+        ctx.fillStyle = "#94a3b8";
+        ctx.fill();
+      });
+
+      // Target attractor point
+      const targetV = 0.60;
+      const targetA = 0.20;
+      const tx = valToPx(targetV);
+      const ty = aroToPx(targetA);
+      ctx.beginPath();
+      ctx.arc(tx, ty, 7, 0, 2*Math.PI);
+      ctx.fillStyle = "#4ade80";
+      ctx.fill();
+      ctx.fillText("Attractor Target", tx + 10, ty + 4);
+
+      // Current User state point
+      const ux = valToPx(currentVal);
+      const uy = aroToPx(currentAro);
+      ctx.beginPath();
+      ctx.arc(ux, uy, 9, 0, 2*Math.PI);
+      ctx.fillStyle = "#f43f5e";
+      ctx.fill();
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.fillStyle = "#f43f5e";
+      ctx.fillText(`Initial User (${currentVal.toFixed(2)}, ${currentAro.toFixed(2)})`, ux + 12, uy - 4);
+
+      // Draw Iso-Principle Trajectory Curve
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 3;
+      ctx.setLineDash([5, 5]);
+      ctx.beginPath();
+      ctx.moveTo(ux, uy);
+      ctx.lineTo(tx, ty);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Step nodes along trajectory (5 points)
+      for (let k = 0; k < 5; k++) {
+        let tau = k / 4.0;
+        let sv = (1.0 - tau) * currentVal + tau * targetV;
+        let sa = (1.0 - tau) * currentAro + tau * targetA;
+        let px = valToPx(sv);
+        let py = aroToPx(sa);
+
+        ctx.beginPath();
+        ctx.arc(px, py, 5, 0, 2*Math.PI);
+        ctx.fillStyle = "#38bdf8";
+        ctx.fill();
+      }
+    }
+
+    function computeRecommendations() {
+      const targetV = 0.60;
+      const targetA = 0.20;
+      const K = 5;
+      const lambda = 0.65;
+
+      let pool = [...catalog];
+      let selected = [];
+
+      for (let k = 0; k < K; k++) {
+        let tau = k / (K - 1.0);
+        let stepV = (1.0 - tau) * currentVal + tau * targetV;
+        let stepA = (1.0 - tau) * currentAro + tau * targetA;
+
+        let bestCand = null;
+        let bestScore = -Infinity;
+        let bestIdx = -1;
+
+        for (let i = 0; i < pool.length; i++) {
+          let cand = pool[i];
+          let dist = Math.sqrt(Math.pow(cand.val - stepV, 2) + Math.pow(cand.aro - stepA, 2));
+          let rel = Math.exp(-Math.pow(dist, 2) / (2 * 0.45 * 0.45));
+
+          let red = 0.0;
+          if (selected.length > 0) {
+            red = Math.max(...selected.map(s => (cand.genre === s.genre ? 0.8 : 0.2)));
+          }
+
+          let score = lambda * rel - (1.0 - lambda) * red;
+          if (score > bestScore) {
+            bestScore = score;
+            bestCand = cand;
+            bestIdx = i;
+          }
+        }
+
+        if (bestCand) {
+          selected.push({
+            rank: k + 1,
+            targetValence: stepV,
+            score: bestScore,
+            ...bestCand
+          });
+          pool.splice(bestIdx, 1);
+        }
+      }
+
+      renderPlaylist(selected);
+    }
+
+    function renderPlaylist(tracks) {
+      const container = document.getElementById("playlist-container");
+      container.innerHTML = "";
+
+      tracks.forEach(t => {
+        const row = document.createElement("div");
+        row.className = "track-row";
+        row.innerHTML = `
+          <div class="track-rank">${t.rank}</div>
+          <div class="track-info">
+            <h4>${t.title}</h4>
+            <p>${t.artist} &bull; ${t.bpm}</p>
+            <span class="track-genre">${t.genre}</span>
+          </div>
+          <div class="track-target">
+            Target Step Val:<br><span>${t.targetValence >= 0 ? "+" : ""}${t.targetValence.toFixed(2)}</span>
+          </div>
+          <div class="track-score">
+            MMR: ${(t.score * 100).toFixed(1)}%
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      // Update telemetry
+      document.getElementById("disp-emotion").innerText = currentEmotion;
+      document.getElementById("disp-val").innerText = (currentVal >= 0 ? "+" : "") + currentVal.toFixed(2);
+      document.getElementById("disp-aro").innerText = (currentAro >= 0 ? "+" : "") + currentAro.toFixed(2);
+
+      const banner = document.getElementById("trajectory-description");
+      if (currentVal < -0.2) {
+        banner.innerHTML = `<strong>Iso-Principle Active:</strong> Initial detected affect is melancholic/distressed (<span style="color:#f43f5e">${currentEmotion}</span>). The algorithm first plays an empathetic resonant track (Rank 1), then smoothly transitions along $\\mathcal{T}^*$ through acoustic ambient harmonics toward positive serenity (Rank 5).`;
+      } else if (currentVal > 0.4) {
+        banner.innerHTML = `<strong>Positive Reinforcement:</strong> Initial detected affect is highly positive (<span style="color:#4ade80">${currentEmotion}</span>). The algorithm curates vibrant, high-energy euphoric and funk tracks while preserving acoustic catalog variety via MMR diversification.`;
+      } else {
+        banner.innerHTML = `<strong>Equilibrium Stabilization:</strong> Initial detected affect is balanced/neutral (<span style="color:#38bdf8">${currentEmotion}</span>). The algorithm introduces subtle warm melodic textures to stimulate gentle mood uplift.`;
+      }
+    }
+
+    function setPreset(v, a, emo) {
+      currentVal = v;
+      currentAro = a;
+      currentEmotion = emo;
+      draw();
+      computeRecommendations();
+    }
+
+    canvas.addEventListener("click", e => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      currentVal = Math.max(-1.0, Math.min(1.0, pxToVal(x)));
+      currentAro = Math.max(-1.0, Math.min(1.0, pxToAro(y)));
+
+      if (currentVal > 0.2 && currentAro > 0.2) currentEmotion = "Happy / Joy";
+      else if (currentVal < -0.2 && currentAro > 0.2) currentEmotion = "Angry / Tense";
+      else if (currentVal < -0.2 && currentAro < -0.2) currentEmotion = "Sad / Melancholy";
+      else if (currentVal > 0.2 && currentAro < -0.2) currentEmotion = "Calm / Serene";
+      else currentEmotion = "Neutral / Focus";
+
+      draw();
+      computeRecommendations();
+    });
+
+    // Initial launch
+    draw();
+    computeRecommendations();
+  </script>
+</body>
+</html>

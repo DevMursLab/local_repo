@@ -1,0 +1,15 @@
+{
+  "id": "mursalinshuvo/affectiveecho-fer2013-gpu-training",
+  "title": "AffectiveEcho FER2013 GPU Training",
+  "code_file": "validation_ensemble.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_internet": "true",
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["msambare/fer2013"],
+  "competition_sources": [],
+  "kernel_sources": ["mursalinshuvo/affectiveecho-fer2013-gpu-training"],
+  "model_sources": []
+}

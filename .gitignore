@@ -1,0 +1,42 @@
+# Data, checkpoints, and remote-run artifacts are reproducible but must not be versioned.
+data/external/
+artifacts/
+kaggle_kernel/*.pt
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# LaTeX build output (source and intentional figures remain tracked)
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.pdf
+paper/missfont.log
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Secrets
+.env
+*.key
+*.pem
+kaggle.json
+
+# Historical simulated results and unverified submission drafts stay local until
+# replaced by evidence from the reproducibility protocol.
+experiments/benchmark_results.json
+SUBMISSION_WALKTHROUGH.md
+main_report.pdf
+paper/Cover_Letter.tex
+paper/IEEE_Manuscript.tex
+paper/Reviewer_Defense_and_Checklist.md
+paper/Supplementary_Material.tex
