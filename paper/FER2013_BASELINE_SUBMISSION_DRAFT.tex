@@ -1,0 +1,75 @@
+\documentclass[10pt,conference]{IEEEtran}
+\usepackage{booktabs}
+\usepackage{url}
+\usepackage{hyperref}
+\hypersetup{hidelinks}
+
+\title{An Evidence-First Reproducible Baseline for\
+Seven-Class Facial Expression Recognition on FER2013}
+
+\author{\IEEEauthorblockN{Mursalin}
+\IEEEauthorblockA{Independent Researcher\\
+\texttt{programmer.mursalin016@gmail.com}}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Facial expression recognition is frequently used as an upstream component in affect-aware systems, yet prototype reports often mix simulated outcomes, validation tuning, and held-out test results. This paper reports a deliberately narrow and reproducible baseline: seven-class categorical facial expression recognition on FER2013. We fine-tune an ImageNet-initialised MobileNetV3-Large model with class-balanced cross-entropy, select the checkpoint using a stratified validation subset, and evaluate the selected model once on the held-out FER2013 test partition. The model obtains 68.70\% accuracy, 68.20\% macro F1, and Cohen's $\kappa=0.6214$ on 7,178 test images. We release the training and manifest-validation code, configuration provenance, and a reporting protocol. The result is a baseline rather than a state-of-the-art claim; FER2013 alone cannot support conclusions about continuous valence--arousal estimation, recommendation relevance, clinical benefit, or user experience.
+\end{abstract}
+
+\begin{IEEEkeywords}
+facial expression recognition, FER2013, reproducibility, MobileNetV3, affective computing
+\end{IEEEkeywords}
+
+\section{Introduction}
+Facial expression recognition (FER) is a core perceptual task in affective computing \cite{picard2000affective}. FER2013, introduced through a machine-learning challenge, remains a compact seven-class benchmark with substantial ambiguity and class imbalance \cite{goodfellow2013challenges}. Its common use makes it valuable for reproducibility studies, but it also makes protocol discipline essential: a held-out test partition must not guide architecture selection, and a categorical FER result should not be presented as evidence for broader affective or clinical claims.
+
+This work makes three bounded contributions. First, it provides a reproducible MobileNetV3-Large categorical baseline with an explicit train/validation/test protocol. Second, it preserves raw prediction and configuration artifacts outside source control while versioning the code and validation guards needed to recreate them. Third, it states the inferential boundary of the experiment: the experiment concerns only categorical FER on FER2013.
+
+\section{Method}
+\subsection{Task and data protocol}
+The task is classification of the seven FER2013 categories: anger, disgust, fear, happiness, neutrality, sadness, and surprise. The authorised FER2013 distribution contains 35,887 images. We retain its 7,178-image test partition as a held-out test set. From the 28,709-image training partition, we create a seed-fixed stratified split ($90\%/10\%$), giving 25,838 training images and 2,871 validation images. The random seed is 20261107. The test partition is not used for checkpoint selection.
+
+The experiment is categorical only. FER2013 does not contain continuous valence or arousal labels; therefore no valence--arousal loss, target, or performance score is used or reported.
+
+\subsection{Model and optimisation}
+We use an ImageNet-initialised MobileNetV3-Large backbone \cite{howard2019searching} with a seven-logit classification head. Training uses class-balanced cross-entropy, where each training class receives an inverse-frequency weight. Images are processed as grayscale input expanded to three channels, resized to $224\times224$, and normalised with ImageNet statistics. The run uses 25 epochs on a Tesla T4 GPU. The selected checkpoint is the one with maximum validation accuracy.
+
+\subsection{Evaluation and provenance}
+We report accuracy, macro precision, macro recall, macro F1, and Cohen's $\kappa$. Macro summaries prevent common classes from masking rare-class performance. The released code validates manifest split membership, labels, duplicate image paths, and (where available) subject-level split leakage before training. The run records the seed, dataset manifest hash, checkpoint hash, framework versions, GPU identifier, per-epoch validation accuracy, and per-image held-out predictions.
+
+\section{Results}
+Table~\ref{tab:results} reports evaluation of the validation-selected checkpoint on the held-out test partition exactly once. These values are descriptive results from one fixed split and one seed; they are not a claim of state-of-the-art performance.
+
+\begin{table}[t]
+\caption{Held-out FER2013 test results ($n=7{,}178$).}
+\label{tab:results}
+\centering
+\begin{tabular}{lr}
+\toprule
+Metric & Score \\
+\midrule
+Accuracy & 0.6870 \\
+Macro precision & 0.6897 \\
+Macro recall & 0.6754 \\
+Macro F1 & 0.6820 \\
+Cohen's $\kappa$ & 0.6214 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+For an architecture check that did not access the held-out test set, an EfficientNet-B0 run achieved validation accuracy 0.6907 and validation macro F1 0.6597. Since its macro F1 did not exceed the MobileNetV3 baseline's reported held-out macro F1, and it was not evaluated on the held-out partition, it is retained as a validation-only observation rather than a competing test result.
+
+\section{Discussion and limitations}
+The result establishes a reproducible categorical FER baseline, not a complete affect-aware system. First, FER2013 labels are discrete classes and do not validate continuous valence--arousal estimation. A dataset with authorised dimensional labels, such as AffectNet \cite{mollahosseini2017affectnet}, would be needed for that task. Second, the single seed and single benchmark do not quantify cross-dataset robustness; repeated-seed estimates and an external evaluation set are necessary before strong generalisation claims. Third, image-label performance does not establish recommendation relevance, user satisfaction, therapeutic value, or clinical utility. Those claims require independent recommendation labels or interaction data and, where people are involved, an approved human-subject protocol.
+
+\section{Reproducibility and responsible release}
+The repository provides the training entry point, dataset-manifest preparation and validation scripts, experiment configuration, and an evidence register. Copyrighted images, checkpoints, and raw predictions are not committed. A researcher with authorised FER2013 access can reproduce the split and pipeline using the fixed seed. The accompanying repository documentation also distinguishes completed measurements from planned experiments, avoiding the common error of treating synthetic benchmark values as empirical evidence.
+
+\section{Conclusion}
+We report an evidence-first MobileNetV3-Large baseline for categorical FER on FER2013: 68.70\% held-out accuracy and 68.20\% macro F1. The contribution is intentionally modest: a transparent, bounded, and reproducible starting point for FER experimentation. Future work should add authorised continuous affect data, external validation, uncertainty estimates, and independent downstream evaluation before broad affect-aware system claims are made.
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+\end{document}
