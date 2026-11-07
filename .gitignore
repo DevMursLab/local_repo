@@ -2,6 +2,7 @@
 data/external/
 artifacts/
 kaggle_kernel/*.pt
+tmp/
 
 # Python
 __pycache__/
