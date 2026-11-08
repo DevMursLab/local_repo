@@ -51,7 +51,6 @@ Audio features → valence/arousal map ─┴→ trajectory-aware MMR ranking �
 
 The full protocol is available in [RESEARCH_EXECUTION_PROTOCOL.md](paper/RESEARCH_EXECUTION_PROTOCOL.md).
 The measured FER2013 results and their reporting boundary are recorded in [RESULTS.md](RESULTS.md).
-An intentionally narrow, evidence-bounded manuscript source and its pre-submission checklist are in [paper/FER2013_BASELINE_SUBMISSION_DRAFT.tex](paper/FER2013_BASELINE_SUBMISSION_DRAFT.tex) and [paper/SUBMISSION_CHECKLIST.md](paper/SUBMISSION_CHECKLIST.md).
 
 ## Reproduce the categorical baseline
 
