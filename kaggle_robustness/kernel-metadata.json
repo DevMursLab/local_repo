@@ -1,6 +1,6 @@
 {
-  "id": "mursalinshuvo/affectiveecho-fer2013-repeated-seed-robustness",
-  "title": "AffectiveEcho FER2013 Repeated Seed Robustness",
+  "id": "mursalinshuvo/affectiveecho-fer2013-resnet18-robustness",
+  "title": "AffectiveEcho FER2013 ResNet18 Robustness",
   "code_file": "repeated_seed_benchmark.py",
   "language": "python",
   "kernel_type": "script",

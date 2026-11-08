@@ -1,4 +1,4 @@
-"""Pre-registered repeated-seed FER2013 MobileNetV3 benchmark.
+"""Pre-registered repeated-seed FER2013 ResNet-18 benchmark.
 
 This script uses the official FER2013 test folder only after selecting each
 checkpoint on a stratified validation split. It exports every seed's test
@@ -23,6 +23,7 @@ from torchvision import models, transforms
 SEEDS = [20261107, 20261108, 20261109]
 EPOCHS = 25
 BATCH_SIZE = 128
+ARCHITECTURE = "ResNet-18"
 LABELS = ["angry", "disgust", "fear", "happy", "neutral", "sad", "surprise"]
 INPUT, OUT = Path("/kaggle/input"), Path("/kaggle/working/affectiveecho_robustness")
 OUT.mkdir(parents=True, exist_ok=True)
@@ -97,8 +98,8 @@ for seed in SEEDS:
         "validation": DataLoader(FER(validation_rows, EVAL_TRANSFORM), BATCH_SIZE, num_workers=4, pin_memory=True),
         "test": DataLoader(FER(TEST, EVAL_TRANSFORM), BATCH_SIZE, num_workers=4, pin_memory=True),
     }
-    model = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT)
-    model.classifier[3] = nn.Linear(model.classifier[3].in_features, len(LABELS)); model.to(device)
+    model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+    model.fc = nn.Linear(model.fc.in_features, len(LABELS)); model.to(device)
     counts = Counter(label for _, label in train_rows)
     weights = torch.tensor([len(train_rows) / (len(LABELS) * counts[i]) for i in range(len(LABELS))], device=device)
     loss_fn = nn.CrossEntropyLoss(weight=weights); optimiser = torch.optim.AdamW(model.parameters(), lr=2e-4, weight_decay=1e-4)
@@ -123,7 +124,7 @@ for seed in SEEDS:
 
 summary = {key: {"mean": float(np.mean([run["test"][key] for run in runs])), "std": float(np.std([run["test"][key] for run in runs], ddof=1))}
            for key in ["accuracy", "macro_precision", "macro_recall", "macro_f1", "cohen_kappa"]}
-provenance = {"dataset": "msambare/fer2013", "architecture": "MobileNetV3-Large", "seeds": SEEDS, "epochs": EPOCHS,
+provenance = {"dataset": "msambare/fer2013", "architecture": ARCHITECTURE, "seeds": SEEDS, "epochs": EPOCHS,
               "device": torch.cuda.get_device_name(0), "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
 (OUT / "summary.json").write_text(json.dumps({"runs": runs, "aggregate": summary, "provenance": provenance}, indent=2))
 print(json.dumps({"aggregate": summary, "provenance": provenance}, indent=2), flush=True)
