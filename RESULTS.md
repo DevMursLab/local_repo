@@ -51,6 +51,20 @@ All models below use the same FER2013 split (25,838 train / 2,871 validation / 7
 
 Under this controlled comparison, ResNet-18 is the strongest tested architecture. The repeated-seed MobileNetV3 study remains useful as a lightweight-model robustness reference; it must not be directly compared to the single-seed ResNet-18 point estimate as though they had identical uncertainty analysis. A final manuscript should repeat the selected ResNet-18 configuration across the same three seeds before claiming an aggregate improvement.
 
+## Experiment E04: selected-model robustness
+
+The selected ResNet-18 configuration was repeated on three independently seeded, stratified train/validation splits. Each run used its own validation-selected checkpoint and the unchanged 7,178-image held-out test partition.
+
+| Metric | Mean | Sample SD |
+| --- | ---: | ---: |
+| Accuracy | **0.6952** | 0.0037 |
+| Macro precision | 0.6980 | 0.0049 |
+| Macro recall | 0.6828 | 0.0045 |
+| Macro F1 | **0.6891** | 0.0038 |
+| Cohen's kappa | 0.6316 | 0.0044 |
+
+The individual test accuracies were 0.6992, 0.6920, and 0.6945. This repeat establishes stable performance for the selected ResNet-18 configuration under the stated FER2013 protocol. It remains a benchmark-specific result, not a claim of state-of-the-art or cross-dataset generalisation.
+
 Raw test predictions, the selected checkpoint, run configuration, and provenance JSON are retained as non-versioned research artifacts. The repository deliberately does not publish the dataset or model checkpoint because of size and data-distribution constraints.
 
 ## Experiment E02: validation-only architecture check
