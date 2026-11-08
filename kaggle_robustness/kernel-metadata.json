@@ -1,0 +1,15 @@
+{
+  "id": "mursalinshuvo/affectiveecho-fer2013-repeated-seed-robustness",
+  "title": "AffectiveEcho FER2013 Repeated Seed Robustness",
+  "code_file": "repeated_seed_benchmark.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_internet": "true",
+  "machine_shape": "NvidiaTeslaT4",
+  "dataset_sources": ["msambare/fer2013"],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
