@@ -19,10 +19,25 @@ This page is the authoritative record for results that may be cited from this re
 | Metric | Score |
 | --- | ---: |
 | Accuracy | 0.6870 |
+| 95% bootstrap accuracy CI (5,000 draws) | [0.6767, 0.6977] |
 | Macro precision | 0.6897 |
 | Macro recall | 0.6754 |
 | Macro F1 | 0.6820 |
 | Cohen's kappa | 0.6214 |
+
+### Per-class analysis
+
+| Class | F1 | Test support |
+| --- | ---: | ---: |
+| Angry | 0.6107 | 958 |
+| Disgust | 0.7273 | 111 |
+| Fear | 0.5509 | 1,024 |
+| Happy | 0.8680 | 1,774 |
+| Neutral | 0.6385 | 1,233 |
+| Sad | 0.5588 | 1,247 |
+| Surprise | 0.8199 | 831 |
+
+The confidence interval was computed from 5,000 bootstrap resamples of the held-out predictions (seed 20261107). Fear and sad expressions remain the principal error modes; any future method should be evaluated against this class-wise baseline rather than accuracy alone.
 
 Raw test predictions, the selected checkpoint, run configuration, and provenance JSON are retained as non-versioned research artifacts. The repository deliberately does not publish the dataset or model checkpoint because of size and data-distribution constraints.
 

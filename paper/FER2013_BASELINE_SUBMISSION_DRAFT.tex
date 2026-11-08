@@ -37,7 +37,7 @@ The experiment is categorical only. FER2013 does not contain continuous valence 
 We use an ImageNet-initialised MobileNetV3-Large backbone \cite{howard2019searching} with a seven-logit classification head. Training uses class-balanced cross-entropy, where each training class receives an inverse-frequency weight. Images are processed as grayscale input expanded to three channels, resized to $224\times224$, and normalised with ImageNet statistics. The run uses 25 epochs on a Tesla T4 GPU. The selected checkpoint is the one with maximum validation accuracy.
 
 \subsection{Evaluation and provenance}
-We report accuracy, macro precision, macro recall, macro F1, and Cohen's $\kappa$. Macro summaries prevent common classes from masking rare-class performance. The released code validates manifest split membership, labels, duplicate image paths, and (where available) subject-level split leakage before training. The run records the seed, dataset manifest hash, checkpoint hash, framework versions, GPU identifier, per-epoch validation accuracy, and per-image held-out predictions.
+We report accuracy, macro precision, macro recall, macro F1, and Cohen's $\kappa$. We obtain a non-parametric 95\% accuracy interval using 5,000 bootstrap resamples of frozen held-out predictions (seed 20261107). Macro summaries prevent common classes from masking rare-class performance. The released code validates manifest split membership, labels, duplicate image paths, and (where available) subject-level split leakage before training. The run records the seed, dataset manifest hash, checkpoint hash, framework versions, GPU identifier, per-epoch validation accuracy, and per-image held-out predictions.
 
 \section{Results}
 Table~\ref{tab:results} reports evaluation of the validation-selected checkpoint on the held-out test partition exactly once. These values are descriptive results from one fixed split and one seed; they are not a claim of state-of-the-art performance.
@@ -55,6 +55,28 @@ Macro precision & 0.6897 \\
 Macro recall & 0.6754 \\
 Macro F1 & 0.6820 \\
 Cohen's $\kappa$ & 0.6214 \\
+95\% bootstrap accuracy CI & [0.6767, 0.6977] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:classwise} exposes class-wise behaviour. Happiness and surprise have the strongest F1 scores, whereas fear and sadness remain difficult. The ``disgust'' score should be interpreted cautiously because it has only 111 test examples. This analysis is intended as a measurable baseline for future improvement rather than an assertion of novelty by itself.
+
+\begin{table}[t]
+\caption{Per-class held-out F1 and support.}
+\label{tab:classwise}
+\centering
+\begin{tabular}{lrr}
+\toprule
+Class & F1 & Support \\
+\midrule
+Angry & 0.6107 & 958 \\
+Disgust & 0.7273 & 111 \\
+Fear & 0.5509 & 1,024 \\
+Happy & 0.8680 & 1,774 \\
+Neutral & 0.6385 & 1,233 \\
+Sad & 0.5588 & 1,247 \\
+Surprise & 0.8199 & 831 \\
 \bottomrule
 \end{tabular}
 \end{table}
